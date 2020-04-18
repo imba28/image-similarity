@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 )
 
-func DirectoryIndex(dir string) []ImageDescriptor {
+func DirectoryIndex(dir string) ([]ImageDescriptor, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		fmt.Println("could not open source directory")
-		return nil
+		return nil, err
 	}
 
 	var images []ImageDescriptor
@@ -27,7 +26,7 @@ func DirectoryIndex(dir string) []ImageDescriptor {
 		})
 	}
 
-	return images
+	return images, nil
 }
 
 func ShowMask(mat gocv.Mat) {
