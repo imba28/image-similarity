@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"gocv.io/x/gocv"
+	"image"
+	"image/color"
 	"io/ioutil"
 	"math"
 	"os"
@@ -12,12 +14,12 @@ import (
 )
 
 type ImageFeature struct {
-	Path string
+	Path     string
 	Features []float64
 }
 
 type ImageDistance struct {
-	Path string
+	Path     string
 	Distance float64
 }
 
@@ -43,43 +45,90 @@ func featureVector(path string) ([]float64, error) {
 		return nil, fmt.Errorf("error reading image from %q\n", path)
 	}
 
-	hsvImg := gocv.NewMat()
-	defer hsvImg.Close()
-	img.ConvertTo(&hsvImg, gocv.ColorBGRToHSV)
+	img.ConvertTo(&img, gocv.ColorBGRToHSV)
 
-	/*width, height := hsvImg.Size()[1], hsvImg.Size()[0]
-	cx, cy := int(width / 2), int(height / 2)
+	width, height := img.Size()[1], img.Size()[0]
+	cx, cy := int(width/2), int(height/2)
 
-	segments := [][]int {
-		{0, 0, cx, cy}, // top left
-		{cx, 0, width, cy}, // top right
-		{0, cy, cx, height}, // bottom left
+	segments := [][]int{
+		{0, 0, cx, cy},          // top left
+		{cx, 0, width, cy},      // top right
+		{0, cy, cx, height},     // bottom left
 		{cx, cy, width, height}, // bottom right
-	}*/
+	}
 
-	mask := gocv.NewMat()
-	defer mask.Close()
+	var features []float64
 
 	hist := gocv.NewMat()
 	defer hist.Close()
 
-	bins := []int{8, 12, 3}
+	channels := []int{0, 1, 2}
+	bins := []int{8, 12, 6}
 	// h [0,180], s[0,256], v[0,256]
 	ranges := []float64{0, 180, 0, 256, 0, 256}
-	gocv.CalcHist([]gocv.Mat{hsvImg}, []int{0,1,2}, mask, &hist, bins, ranges, false)
-	gocv.Normalize(hist, &hist, 1, 0, gocv.NormL2)
 
-	hist2 := gocv.NewMat()
-	hist.ConvertTo(&hist2, gocv.MatTypeCV64F)
+	black := color.RGBA{0, 0, 0, 0}
+	white := color.RGBA{255, 255, 255, 0}
 
-	features,err := hist2.DataPtrFloat64()
+	axesX, axesY := int((float32(width)*0.75)/2), int((float32(height)*0.75)/2)
+	ellipMask := gocv.NewMatWithSize(height, width, gocv.MatTypeCV8UC1)
+	defer ellipMask.Close()
+	gocv.Ellipse(&ellipMask, image.Point{cx, cy}, image.Point{axesX, axesY}, 0, 0, 360, white, -1)
+
+	segmentMask := gocv.NewMatWithSize(height, width, gocv.MatTypeCV8UC1)
+	defer segmentMask.Close()
+
+	for _, segment := range segments {
+		gocv.Rectangle(&segmentMask, image.Rect(0, 0, width, height), black, -1)
+		gocv.Rectangle(&segmentMask, image.Rect(segment[0], segment[1], segment[2], segment[3]), white, -1)
+		gocv.Subtract(segmentMask, ellipMask, &segmentMask)
+
+		showMask(segmentMask)
+
+		segmentFeatures, err := featuresInSegment(img, channels, segmentMask, hist, bins, ranges)
+		if err != nil {
+			return nil, err
+		}
+
+		features = append(features, segmentFeatures...)
+	}
+
+	showMask(ellipMask)
+
+	ellipFeatures, err := featuresInSegment(img, channels, ellipMask, hist, bins, ranges)
 	if err != nil {
 		return nil, err
 	}
+	features = append(features, ellipFeatures...)
 
 	return features, nil
+}
 
-	// axesX, axesY := int((width * 0.75) / 2), int((height * 0.75) / 2)
+func featuresInSegment(img gocv.Mat, channels []int, mask gocv.Mat, hist gocv.Mat, bins []int, ranges []float64) ([]float64, error) {
+	gocv.CalcHist([]gocv.Mat{img}, channels, mask, &hist, bins, ranges, false)
+	gocv.Normalize(hist, &hist, 1, 0, gocv.NormL2)
+
+	float64Hist := gocv.NewMat()
+	defer float64Hist.Close()
+
+	hist.ConvertTo(&float64Hist, gocv.MatTypeCV64F)
+	return float64Hist.DataPtrFloat64()
+}
+
+func showMask(mat gocv.Mat) {
+	if true {
+		return
+	}
+
+	window := gocv.NewWindow("Mask")
+	defer window.Close()
+
+	for {
+		window.IMShow(mat)
+		if window.WaitKey(0) >= 0 {
+			break
+		}
+	}
 }
 
 func directoryIndex(dir string) []ImageFeature {
@@ -106,7 +155,6 @@ func directoryIndex(dir string) []ImageFeature {
 	return images
 }
 
-
 func calculateDistances(referencePath string, vectors []ImageFeature) ([]ImageDistance, error) {
 	referenceVector, err := featureVector(referencePath)
 	if err != nil {
@@ -130,7 +178,7 @@ func chi2Distance(v1, v2 []float64) float64 {
 	min := int(math.Min(float64(len(v1)), float64(len(v2))))
 
 	for i := 0; i < min; i++ {
-		distance := math.Pow(v1[i] - v2[i], 2) / (v1[i] + v2[i] + 1e-10)
+		distance := math.Pow(v1[i]-v2[i], 2) / (v1[i] + v2[i] + 1e-10)
 		d += distance
 	}
 
@@ -138,6 +186,7 @@ func chi2Distance(v1, v2 []float64) float64 {
 }
 
 type ByDistance []ImageDistance
+
 func (a ByDistance) Len() int {
 	return len(a)
 }
@@ -158,7 +207,7 @@ func main() {
 	for {
 		fmt.Println("Input image name: ")
 		text, _ := reader.ReadString('\n')
-		distances, err := calculateDistances("images/" + strings.Trim(text, "\n"), index)
+		distances, err := calculateDistances("images/"+strings.Trim(text, "\n"), index)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -167,7 +216,7 @@ func main() {
 		sort.Sort(ByDistance(distances))
 
 		for i, distance := range distances {
-			if distance.Distance > 1 || i > 10 {
+			if distance.Distance > 10 || i > 10 {
 				break
 			}
 			fmt.Println(distance.Path, distance.Distance)
