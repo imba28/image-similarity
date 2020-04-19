@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Building index...")
-	index, err := pkg.DirectoryIndex(*dir)
+	index, err := pkg.NewIndex(*dir)
 	if err != nil {
 		fmt.Printf("could not open image directory %q\n", *dir)
 		return
@@ -29,17 +29,13 @@ func main() {
 	for {
 		fmt.Println("Input image name: ")
 		text, _ := reader.ReadString('\n')
-		distances, err := pkg.CalculateDistances(*dir+"/"+strings.Trim(text, "\n"), index)
+
+		distances, err := index.Search(text, distanceThreshold, maxResultSetLength)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-
-		for i, distance := range distances {
-			if distance.Distance > distanceThreshold || i > maxResultSetLength {
-				break
-			}
-
+		for _, distance := range distances {
 			fmt.Println(distance.Path, distance.Distance)
 			pkg.DisplayImage(distance.Path)
 		}

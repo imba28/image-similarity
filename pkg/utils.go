@@ -4,9 +4,37 @@ import (
 	"fmt"
 	"gocv.io/x/gocv"
 	"io/ioutil"
+	"strings"
 )
 
-func DirectoryIndex(dir string) ([]ImageDescriptor, error) {
+type ImageIndex struct {
+	dir         string
+	descriptors []ImageDescriptor
+}
+
+func (i ImageIndex) Descriptors() []ImageDescriptor {
+	return i.descriptors
+}
+
+func (i ImageIndex) Search(referenceImagePath string, distanceThreshold float64, limit int) ([]ImageDistance, error) {
+	distances, err := CalculateDistances(i.dir+"/"+strings.Trim(referenceImagePath, "\n"), i.descriptors)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []ImageDistance
+
+	for i, distance := range distances {
+		if distance.Distance > distanceThreshold || i > limit {
+			break
+		}
+		results = append(results, distance)
+	}
+
+	return results, nil
+}
+
+func NewIndex(dir string) (*ImageIndex, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -21,12 +49,16 @@ func DirectoryIndex(dir string) ([]ImageDescriptor, error) {
 			continue
 		}
 		images = append(images, ImageDescriptor{
+			Name:     file.Name(),
 			Path:     imagePath,
 			Features: features,
 		})
 	}
 
-	return images, nil
+	return &ImageIndex{
+		dir:         dir,
+		descriptors: images,
+	}, nil
 }
 
 func ShowMask(mat gocv.Mat) {
