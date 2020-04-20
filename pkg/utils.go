@@ -13,11 +13,16 @@ type Image struct {
 
 type ImageProvider interface {
 	Images() ([]Image, error)
+	Get(string) *Image
 }
 
 type ImageIndex struct {
 	provider    ImageProvider
 	descriptors []ImageDescriptor
+}
+
+func (i ImageIndex) Get(id string) *Image {
+	return i.provider.Get(id)
 }
 
 func (i ImageIndex) Descriptors() []ImageDescriptor {

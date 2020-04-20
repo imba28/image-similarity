@@ -29,6 +29,11 @@ func (f ImageProvider) Images() ([]pkg.Image, error) {
 	return images, nil
 }
 
+func (f ImageProvider) Get(id string) *pkg.Image {
+	i := NewImage(f.dir + "/" + id)
+	return &i
+}
+
 func NewImage(path string) pkg.Image {
 	parts := strings.Split(path, "/")
 	return pkg.Image{
