@@ -3,12 +3,19 @@ package pkg
 import (
 	"fmt"
 	"gocv.io/x/gocv"
-	"io/ioutil"
-	"strings"
 )
 
+type Image struct {
+	Path string
+	Name string
+}
+
+type ImageProvider interface {
+	Images() ([]Image, error)
+}
+
 type ImageIndex struct {
-	dir         string
+	provider    ImageProvider
 	descriptors []ImageDescriptor
 }
 
@@ -16,8 +23,8 @@ func (i ImageIndex) Descriptors() []ImageDescriptor {
 	return i.descriptors
 }
 
-func (i ImageIndex) Search(referenceImagePath string, distanceThreshold float64, limit int) ([]ImageDistance, error) {
-	distances, err := CalculateDistances(i.dir+"/"+strings.Trim(referenceImagePath, "\n"), i.descriptors)
+func (i ImageIndex) Search(referenceImage Image, distanceThreshold float64, limit int) ([]ImageDistance, error) {
+	distances, err := CalculateDistances(referenceImage, i.descriptors)
 	if err != nil {
 		return nil, err
 	}
@@ -34,30 +41,29 @@ func (i ImageIndex) Search(referenceImagePath string, distanceThreshold float64,
 	return results, nil
 }
 
-func NewIndex(dir string) (*ImageIndex, error) {
-	files, err := ioutil.ReadDir(dir)
+func NewIndex(p ImageProvider) (*ImageIndex, error) {
+	images, err := p.Images()
 	if err != nil {
 		return nil, err
 	}
 
-	var images []ImageDescriptor
-	for _, file := range files {
-		imagePath := dir + "/" + file.Name()
-		features, err := FeatureVector(imagePath)
+	var imageDescriptors []ImageDescriptor
+	for _, image := range images {
+		features, err := FeatureVector(image)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		images = append(images, ImageDescriptor{
-			Name:     file.Name(),
-			Path:     imagePath,
+		imageDescriptors = append(imageDescriptors, ImageDescriptor{
+			Name:     image.Name,
+			Path:     image.Path,
 			Features: features,
 		})
 	}
 
 	return &ImageIndex{
-		dir:         dir,
-		descriptors: images,
+		provider:    p,
+		descriptors: imageDescriptors,
 	}, nil
 }
 

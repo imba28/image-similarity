@@ -1,2 +1,5 @@
 opencv*
 images
+tmp
+.vscode
+.ipynb_checkpoints

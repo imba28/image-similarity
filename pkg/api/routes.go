@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"imba28/images/pkg"
+	"imba28/images/pkg/provider/file"
 	"net/http"
 	"strings"
 )
@@ -14,7 +15,7 @@ const (
 	maxResultSetLength = 10
 )
 
-func SimilarPhotosJsonHandler(index *pkg.ImageIndex) http.HandlerFunc {
+func SimilarPhotosJsonHandler(index *pkg.ImageIndex, photoDir string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		urlParts := strings.Split(r.URL.Path, "/")
 		if len(urlParts) != 5 {
@@ -24,7 +25,7 @@ func SimilarPhotosJsonHandler(index *pkg.ImageIndex) http.HandlerFunc {
 		photo := urlParts[4]
 		fmt.Printf("Executing query for image %q", photo)
 
-		images, err := index.Search(photo, distanceThreshold, maxResultSetLength)
+		images, err := index.Search(file.NewImage(photoDir+"/"+photo), distanceThreshold, maxResultSetLength)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
@@ -43,7 +44,7 @@ func SimilarPhotosJsonHandler(index *pkg.ImageIndex) http.HandlerFunc {
 	}
 }
 
-func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
+func SimilarPhotosHandler(index *pkg.ImageIndex, photoDir string) http.HandlerFunc {
 	similarTemplate := template.Must(template.ParseFiles("template/similar.html"))
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,7 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			return
 		}
 
-		images, err := index.Search(p[2], distanceThreshold, maxResultSetLength)
+		images, err := index.Search(file.NewImage(photoDir+"/"+p[2]), distanceThreshold, maxResultSetLength)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))

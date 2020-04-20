@@ -19,10 +19,10 @@ type ImageDescriptor struct {
 	Features []float64
 }
 
-func FeatureVector(path string) ([]float64, error) {
-	img := gocv.IMRead(path, gocv.IMReadColor)
+func FeatureVector(i Image) ([]float64, error) {
+	img := gocv.IMRead(i.Path, gocv.IMReadColor)
 	if img.Empty() {
-		return nil, fmt.Errorf("error reading image from %q\n", path)
+		return nil, fmt.Errorf("error reading image from %q\n", i.Path)
 	}
 
 	// convert img to hsv color space

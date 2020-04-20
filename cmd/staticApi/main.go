@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"imba28/images/pkg"
 	"imba28/images/pkg/api"
+	"imba28/images/pkg/provider/file"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,7 +26,7 @@ func main() {
 	}
 
 	fmt.Println("Building index...")
-	index, err := pkg.NewIndex(*dir)
+	index, err := pkg.NewIndex(file.New(*dir))
 	if err != nil {
 		fmt.Printf("could not open image directory %q\n", *dir)
 		return

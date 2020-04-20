@@ -23,7 +23,7 @@ func (a ByDistance) Less(i, j int) bool {
 	return a[i].Distance < a[j].Distance
 }
 
-func CalculateDistances(referencePath string, vectors []ImageDescriptor) ([]ImageDistance, error) {
+func CalculateDistances(referencePath Image, vectors []ImageDescriptor) ([]ImageDistance, error) {
 	referenceVector, err := FeatureVector(referencePath)
 	if err != nil {
 		return nil, err
