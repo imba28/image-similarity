@@ -20,6 +20,7 @@ func (f ImageProvider) Images() ([]pkg.Image, error) {
 
 	for _, file := range files {
 		images = append(images, pkg.Image{
+			Id:   file.Name(),
 			Path: f.dir + "/" + file.Name(),
 			Name: file.Name(),
 		})
@@ -31,6 +32,7 @@ func (f ImageProvider) Images() ([]pkg.Image, error) {
 func NewImage(path string) pkg.Image {
 	parts := strings.Split(path, "/")
 	return pkg.Image{
+		Id:   parts[len(parts)-1],
 		Path: path,
 		Name: parts[len(parts)-1],
 	}

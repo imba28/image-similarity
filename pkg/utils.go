@@ -6,6 +6,7 @@ import (
 )
 
 type Image struct {
+	Id   string
 	Path string
 	Name string
 }
