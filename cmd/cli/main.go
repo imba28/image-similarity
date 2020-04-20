@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"imba28/images/pkg"
+	"imba28/images/pkg/provider/file"
 	"os"
 )
 
@@ -18,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Building index...")
-	index, err := pkg.NewIndex(*dir)
+	index, err := pkg.NewIndex(file.New(*dir))
 	if err != nil {
 		fmt.Printf("could not open image directory %q\n", *dir)
 		return
@@ -29,14 +30,19 @@ func main() {
 		fmt.Println("Input image name: ")
 		text, _ := reader.ReadString('\n')
 
-		distances, err := index.Search(text, distanceThreshold, maxResultSetLength)
+		image := index.Get(text)
+		if image == nil {
+			fmt.Println("image not found")
+			return
+		}
+		distances, err := index.Search(*image, distanceThreshold, maxResultSetLength)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		for _, distance := range distances {
-			fmt.Println(distance.Path, distance.Distance)
-			pkg.DisplayImage(distance.Path)
+			fmt.Println(distance.Image.Path, distance.Distance)
+			pkg.DisplayImage(distance.Image.Path)
 		}
 	}
 }

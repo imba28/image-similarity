@@ -30,7 +30,7 @@ func (f ImageProvider) Images() ([]pkg.Image, error) {
 }
 
 func (f ImageProvider) Get(id string) *pkg.Image {
-	i := NewImage(f.dir + "/" + id)
+	i := NewImage(f.dir + "/" + strings.Trim(id, "\n"))
 	return &i
 }
 
