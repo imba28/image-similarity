@@ -26,9 +26,17 @@ func main() {
 	}
 
 	fmt.Println("Building index...")
-	index, err := pkg.NewIndex(dbprovider.New(os.Getenv("DATABASE_URL")))
+
+	var provider pkg.ImageProvider
+	if len(os.Getenv("DATABASE_URL")) > 0 {
+		provider = dbprovider.New(os.Getenv("DATABASE_URL"))
+	} else {
+		provider = dbprovider.NewFromCredentials(os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), 5432, os.Getenv("POSTGRES_DB"))
+	}
+
+	index, err := pkg.NewIndex(provider)
 	if err != nil {
-		fmt.Printf("could not connect to database %q\n", *dir)
+		fmt.Println(err)
 		return
 	}
 
