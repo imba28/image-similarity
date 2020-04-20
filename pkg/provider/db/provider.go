@@ -19,7 +19,7 @@ func (i ImageProvider) Images() ([]pkg.Image, error) {
 
 	defer db.Close()
 
-	rows, err := db.Query("SELECT id, name, image as path FROM locations_photo WHERE visibility = 3 ORDER BY id DESC LIMIT 5")
+	rows, err := db.Query("SELECT id, name, image as path FROM locations_photo WHERE visibility = 3 ORDER BY id DESC")
 	if err != nil {
 		return nil, err
 	}
