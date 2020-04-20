@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"google.golang.org/grpc"
 	"imba28/images/pkg"
@@ -14,16 +13,14 @@ import (
 )
 
 func main() {
-	port := flag.Uint("port", 8080, "Port to bind grpc server to")
-	flag.Parse()
+	port := 8080
 
 	if len(os.Getenv("PORT")) > 0 {
 		p, err := strconv.Atoi(os.Getenv("PORT"))
 		if err != nil {
 			fmt.Printf("cannot convert %q to number!\n", os.Getenv("PORT"))
 		}
-		pp := uint(p)
-		port = &pp
+		port = p
 	}
 
 	fmt.Println("Building index...")
@@ -34,14 +31,14 @@ func main() {
 		return
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
 	pb.RegisterImageSimilarityServiceServer(grpcServer, pb.NewImageSimilarityService(index))
 
-	fmt.Printf("Listening on port :%d\n", *port)
+	fmt.Printf("Listening on port :%d\n", port)
 	panic(grpcServer.Serve(listener))
 }
 
