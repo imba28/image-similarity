@@ -54,7 +54,7 @@ func SimilarPhotosHandler(index *pkg.ImageIndex, photoDir string) http.HandlerFu
 			return
 		}
 
-		images, err := index.Search(file.NewImage(photoDir+"/"+p[2]), distanceThreshold, maxResultSetLength)
+		imageDistances, err := index.Search(file.NewImage(photoDir+"/"+p[2]), distanceThreshold, maxResultSetLength)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
@@ -62,7 +62,7 @@ func SimilarPhotosHandler(index *pkg.ImageIndex, photoDir string) http.HandlerFu
 		}
 
 		w.WriteHeader(200)
-		similarTemplate.Execute(w, images)
+		similarTemplate.Execute(w, imageDistances)
 	}
 }
 

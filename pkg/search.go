@@ -6,8 +6,7 @@ import (
 )
 
 type ImageDistance struct {
-	Path     string
-	Name     string
+	Image    Image
 	Distance float64
 }
 
@@ -33,8 +32,7 @@ func CalculateDistances(referencePath Image, vectors []ImageDescriptor) ([]Image
 
 	for _, vector := range vectors {
 		d = append(d, ImageDistance{
-			Name:     vector.Name,
-			Path:     vector.Path,
+			Image:    vector.Image,
 			Distance: chi2Distance(referenceVector, vector.Features),
 		})
 	}

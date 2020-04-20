@@ -14,8 +14,7 @@ const (
 )
 
 type ImageDescriptor struct {
-	Path     string
-	Name     string
+	Image    Image
 	Features []float64
 }
 

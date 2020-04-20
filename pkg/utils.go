@@ -55,8 +55,7 @@ func NewIndex(p ImageProvider) (*ImageIndex, error) {
 			continue
 		}
 		imageDescriptors = append(imageDescriptors, ImageDescriptor{
-			Name:     image.Name,
-			Path:     image.Path,
+			Image:    image,
 			Features: features,
 		})
 	}

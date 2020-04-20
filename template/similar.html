@@ -26,15 +26,16 @@
                 {{range .}}
                     <div class="col-md-4">
                         <div class="card mb-4 shadow-sm">
-                            <img class="bd-placeholder-img card-img-top" src="/images/{{.Name}}" />
+                            <img class="bd-placeholder-img card-img-top" src="/images/{{.Image.Name}}" />
                             <div class="card-body">
-                                <p class="card-text">{{.Name}}</p>
+                                <p class="card-text">{{.Image.Name}}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <a href="/similar/{{.Name}}" class="btn btn-sm btn-outline-secondary">
+                                        <a href="/similar/{{.Image.Name}}" class="btn btn-sm btn-outline-secondary">
                                             View
                                         </a>
                                     </div>
+                                    <small class="text-muted">{{.Distance}}</small>
                                 </div>
                             </div>
                         </div>
