@@ -10,13 +10,13 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN go build -o app ./cmd/api.go
+RUN go build -o api ./cmd/api/main.go
 
 FROM imba28/gocv:1.13
 
-COPY --from=builder /app/app /app
+COPY --from=builder /app/api /api
 COPY --from=builder /app/template /template
 
 EXPOSE 8080
-ENTRYPOINT ["/app", "-directory"]
+ENTRYPOINT ["/api", "-directory"]
 CMD ["/images"]
