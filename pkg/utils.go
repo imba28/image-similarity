@@ -19,9 +19,34 @@ type ImageProvider interface {
 type ImageIndex struct {
 	provider    ImageProvider
 	descriptors []ImageDescriptor
+	imageMap map[string] *Image
 }
 
-func (i ImageIndex) Get(id string) *Image {
+func (i *ImageIndex) Add(image *Image) error {
+	if image == nil || i.Has(image.Id) {
+		return nil
+	}
+
+	feature, err := FeatureVector(*image)
+	if err != nil {
+		return err
+	}
+
+	i.imageMap[image.Id] = image
+	i.descriptors = append(i.descriptors, ImageDescriptor{
+		Image:    *image,
+		Features: feature,
+	})
+
+	return nil
+}
+
+func (i ImageIndex) Has(id string) bool {
+	_, ok := i.imageMap[id]
+	return ok
+}
+
+func (i ImageIndex) Load(id string) *Image {
 	return i.provider.Get(id)
 }
 
@@ -54,22 +79,23 @@ func NewIndex(p ImageProvider) (*ImageIndex, error) {
 	}
 
 	var imageDescriptors []ImageDescriptor
-	for _, image := range images {
-		features, err := FeatureVector(image)
+	imageMap := make(map[string] *Image, len(images))
+
+	imageIndex := &ImageIndex{
+		provider:    p,
+		descriptors: imageDescriptors,
+		imageMap: imageMap,
+	}
+
+	for i := range images {
+		err := imageIndex.Add(&images[i])
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		imageDescriptors = append(imageDescriptors, ImageDescriptor{
-			Image:    image,
-			Features: features,
-		})
 	}
 
-	return &ImageIndex{
-		provider:    p,
-		descriptors: imageDescriptors,
-	}, nil
+	return imageIndex, nil
 }
 
 func ShowMask(mat gocv.Mat) {

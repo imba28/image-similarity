@@ -30,7 +30,7 @@ func main() {
 		fmt.Println("Input image name: ")
 		text, _ := reader.ReadString('\n')
 
-		image := index.Get(text)
+		image := index.Load(text)
 		if image == nil {
 			fmt.Println("image not found")
 			return

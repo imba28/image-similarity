@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"imba28/images/pkg"
+	"imba28/images/pkg/api"
 	"imba28/images/pkg/pb"
 	dbprovider "imba28/images/pkg/provider/db"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -35,10 +37,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	if len(os.Getenv("DEBUG")) > 0 {
+		go func() {
+			mux := api.New(index, "locations")
+
+			address := fmt.Sprintf(":%d", 8086)
+			fmt.Printf("UI: Listening on %s", address)
+
+			panic(http.ListenAndServe(address, mux))
+		}()
+	}
+
 	grpcServer := grpc.NewServer()
 	pb.RegisterImageSimilarityServiceServer(grpcServer, pb.NewImageSimilarityService(index))
 
-	fmt.Printf("Listening on port :%d\n", port)
+	fmt.Printf("GRPC: Listening on port :%d\n", port)
 	panic(grpcServer.Serve(listener))
 }
 

@@ -21,7 +21,7 @@ func SimilarPhotosJsonHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			w.WriteHeader(400)
 			return
 		}
-		photo := index.Get(urlParts[4])
+		photo := index.Load(urlParts[4])
 		if photo == nil {
 			w.WriteHeader(404)
 			return
@@ -57,7 +57,7 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			return
 		}
 
-		image := index.Get(p[2])
+		image := index.Load(p[2])
 		if image == nil {
 			w.WriteHeader(404)
 			return

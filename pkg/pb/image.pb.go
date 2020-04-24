@@ -263,13 +263,15 @@ var file_image_proto_rawDesc = []byte{
 	0x65, 0x53, 0x69, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x69, 0x74, 0x79, 0x52, 0x0c, 0x73, 0x69, 0x6d,
 	0x69, 0x6c, 0x61, 0x72, 0x69, 0x74, 0x69, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75,
 	0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x32,
-	0x59, 0x0a, 0x16, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x53, 0x69, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x69,
+	0x7f, 0x0a, 0x16, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x53, 0x69, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x69,
 	0x74, 0x79, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3f, 0x0a, 0x0a, 0x47, 0x65, 0x74,
 	0x53, 0x69, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x12, 0x11, 0x2e, 0x6d, 0x6d, 0x70, 0x2e, 0x49, 0x6d,
 	0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x6d, 0x6d, 0x70,
 	0x2e, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x53, 0x69, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x69, 0x74, 0x79,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x3b,
-	0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x08, 0x41, 0x64,
+	0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x12, 0x0a, 0x2e, 0x6d, 0x6d, 0x70, 0x2e, 0x49, 0x6d, 0x61,
+	0x67, 0x65, 0x1a, 0x0a, 0x2e, 0x6d, 0x6d, 0x70, 0x2e, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x22, 0x00,
+	0x42, 0x06, 0x5a, 0x04, 0x2e, 0x3b, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -296,9 +298,11 @@ var file_image_proto_depIdxs = []int32{
 	0, // 1: mmp.ImageRequest.image:type_name -> mmp.Image
 	1, // 2: mmp.ImageSimilarityResponse.similarities:type_name -> mmp.ImageSimilarity
 	2, // 3: mmp.ImageSimilarityService.GetSimilar:input_type -> mmp.ImageRequest
-	3, // 4: mmp.ImageSimilarityService.GetSimilar:output_type -> mmp.ImageSimilarityResponse
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
+	0, // 4: mmp.ImageSimilarityService.AddImage:input_type -> mmp.Image
+	3, // 5: mmp.ImageSimilarityService.GetSimilar:output_type -> mmp.ImageSimilarityResponse
+	0, // 6: mmp.ImageSimilarityService.AddImage:output_type -> mmp.Image
+	5, // [5:7] is the sub-list for method output_type
+	3, // [3:5] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
@@ -392,6 +396,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ImageSimilarityServiceClient interface {
 	GetSimilar(ctx context.Context, in *ImageRequest, opts ...grpc.CallOption) (*ImageSimilarityResponse, error)
+	AddImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Image, error)
 }
 
 type imageSimilarityServiceClient struct {
@@ -411,9 +416,19 @@ func (c *imageSimilarityServiceClient) GetSimilar(ctx context.Context, in *Image
 	return out, nil
 }
 
+func (c *imageSimilarityServiceClient) AddImage(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Image, error) {
+	out := new(Image)
+	err := c.cc.Invoke(ctx, "/mmp.ImageSimilarityService/AddImage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImageSimilarityServiceServer is the server API for ImageSimilarityService service.
 type ImageSimilarityServiceServer interface {
 	GetSimilar(context.Context, *ImageRequest) (*ImageSimilarityResponse, error)
+	AddImage(context.Context, *Image) (*Image, error)
 }
 
 // UnimplementedImageSimilarityServiceServer can be embedded to have forward compatible implementations.
@@ -422,6 +437,9 @@ type UnimplementedImageSimilarityServiceServer struct {
 
 func (*UnimplementedImageSimilarityServiceServer) GetSimilar(context.Context, *ImageRequest) (*ImageSimilarityResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSimilar not implemented")
+}
+func (*UnimplementedImageSimilarityServiceServer) AddImage(context.Context, *Image) (*Image, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddImage not implemented")
 }
 
 func RegisterImageSimilarityServiceServer(s *grpc.Server, srv ImageSimilarityServiceServer) {
@@ -446,6 +464,24 @@ func _ImageSimilarityService_GetSimilar_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImageSimilarityService_AddImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Image)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageSimilarityServiceServer).AddImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mmp.ImageSimilarityService/AddImage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageSimilarityServiceServer).AddImage(ctx, req.(*Image))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ImageSimilarityService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "mmp.ImageSimilarityService",
 	HandlerType: (*ImageSimilarityServiceServer)(nil),
@@ -453,6 +489,10 @@ var _ImageSimilarityService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSimilar",
 			Handler:    _ImageSimilarityService_GetSimilar_Handler,
+		},
+		{
+			MethodName: "AddImage",
+			Handler:    _ImageSimilarityService_AddImage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
