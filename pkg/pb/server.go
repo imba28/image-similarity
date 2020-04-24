@@ -14,6 +14,9 @@ type ImageSimilarityService struct {
 
 func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (*ImageSimilarityResponse, error) {
 	image := s.index.Load(strconv.Itoa(int(r.Image.Id)))
+
+	fmt.Printf("finding similar images to %d\n", r.Image.Id)
+
 	if image == nil {
 		return nil, errors.New("image not found")
 	}
@@ -46,6 +49,7 @@ func (s ImageSimilarityService) AddImage(c context.Context, i *Image) (*Image, e
 		return nil, errors.New("image not found")
 	}
 	id := strconv.Itoa(int(i.Id))
+	fmt.Printf("adding image %d to the index.\n", i.Id)
 
 	if s.index.Has(id) {
 		return i, nil
