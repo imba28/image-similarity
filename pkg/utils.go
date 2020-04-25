@@ -7,6 +7,7 @@ import (
 
 type Image struct {
 	Id   string
+	Guid string
 	Path string
 	Name string
 }
@@ -19,7 +20,7 @@ type ImageProvider interface {
 type ImageIndex struct {
 	provider    ImageProvider
 	descriptors []ImageDescriptor
-	imageMap map[string] *Image
+	imageMap    map[string]*Image
 }
 
 func (i *ImageIndex) Add(image *Image) error {
@@ -79,12 +80,12 @@ func NewIndex(p ImageProvider) (*ImageIndex, error) {
 	}
 
 	var imageDescriptors []ImageDescriptor
-	imageMap := make(map[string] *Image, len(images))
+	imageMap := make(map[string]*Image, len(images))
 
 	imageIndex := &ImageIndex{
 		provider:    p,
 		descriptors: imageDescriptors,
-		imageMap: imageMap,
+		imageMap:    imageMap,
 	}
 
 	for i := range images {

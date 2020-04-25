@@ -25,11 +25,11 @@ func main() {
 		port = p
 	}
 
-	fmt.Println("Building index...")
+	log.Println("Building index...")
 
 	index, err := pkg.NewIndex(getImageProvider())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -43,7 +43,7 @@ func main() {
 			mux := api.New(index, "locations")
 
 			address := fmt.Sprintf(":%d", 8086)
-			fmt.Printf("UI: Listening on %s", address)
+			log.Printf("UI: Listening on %s", address)
 
 			panic(http.ListenAndServe(address, mux))
 		}()
@@ -52,7 +52,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterImageSimilarityServiceServer(grpcServer, pb.NewImageSimilarityService(index))
 
-	fmt.Printf("GRPC: Listening on port :%d\n", port)
+	log.Printf("GRPC: Listening on port :%d\n", port)
 	panic(grpcServer.Serve(listener))
 }
 
