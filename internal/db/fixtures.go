@@ -2,12 +2,23 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"imba28/images/pkg"
 	dbprovider "imba28/images/pkg/provider/db"
 	"imba28/images/pkg/provider/file"
 )
 
 func CreateImageFixtures(db *sql.DB, dir string) error {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM photos").Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return errors.New("database already contains entries. You should drop it first")
+	}
+
 	p := file.New(dir)
 	dbp := dbprovider.NewFromDb(db)
 
