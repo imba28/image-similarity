@@ -12,3 +12,11 @@ proto:
 
 migrate:
 	migrate -database ${DATABASE_URL} -path db/migrations up
+
+cover:
+	go test -cover ./...
+
+profile:
+	go test -coverprofile=./.profile.out ./...
+	go tool cover -html=./.profile.out && rm ./.profile.out
+
