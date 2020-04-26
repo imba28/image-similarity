@@ -10,16 +10,16 @@ type ImageProvider struct {
 	dir string
 }
 
-func (f ImageProvider) Images() ([]pkg.Image, error) {
+func (f ImageProvider) Images() ([]*pkg.Image, error) {
 	files, err := ioutil.ReadDir(f.dir)
 	if err != nil {
 		return nil, err
 	}
 
-	var images []pkg.Image
+	var images []*pkg.Image
 
 	for _, file := range files {
-		images = append(images, pkg.Image{
+		images = append(images, &pkg.Image{
 			Id:   file.Name(),
 			Path: f.dir + "/" + file.Name(),
 			Name: file.Name(),
@@ -51,3 +51,5 @@ func NewImage(path string) pkg.Image {
 func New(dir string) ImageProvider {
 	return ImageProvider{dir: dir}
 }
+
+var _ pkg.ImageProvider = (*ImageProvider)(nil)

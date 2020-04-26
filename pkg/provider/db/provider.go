@@ -130,3 +130,5 @@ func NewFromCredentials(host string, username string, password string, port uint
 		dataSourceName: fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", username, password, host, port, database),
 	}
 }
+
+var _ pkg.ImageProvider = (*ImageProvider)(nil)
