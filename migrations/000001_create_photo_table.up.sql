@@ -7,4 +7,5 @@ CREATE TABLE IF NOT EXISTS photos(
      vector        float8[] DEFAULT NULL
 );
 CREATE UNIQUE INDEX ON photos(path);
+CREATE UNIQUE INDEX ON photos(guid);
 COMMIT;

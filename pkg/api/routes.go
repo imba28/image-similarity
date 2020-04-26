@@ -70,7 +70,6 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(200)
 		similarTemplate.Execute(w, imageDistances)
 	}
 }
