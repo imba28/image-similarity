@@ -40,7 +40,7 @@ func main() {
 
 	if len(os.Getenv("DEBUG")) > 0 {
 		go func() {
-			mux := api.New(index, "images")
+			mux := api.New(index, "locations")
 
 			address := fmt.Sprintf(":%d", 8086)
 			log.Printf("UI: Listening on %s", address)

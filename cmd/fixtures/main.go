@@ -14,7 +14,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = db2.CreateImageFixtures(db, "images")
+	err = db2.CreateImageFixtures(db, "locations")
 	if err != nil {
 		log.Fatal(err)
 	}
