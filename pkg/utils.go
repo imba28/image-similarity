@@ -37,6 +37,11 @@ func (i *ImageIndex) Add(image *Image) error {
 		}
 
 		image.Features = feature
+
+		err = i.provider.Persist(image)
+		if err != nil {
+			return err
+		}
 	}
 
 	i.imageMap[image.Id] = image
