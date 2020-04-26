@@ -25,6 +25,8 @@ func main() {
 		port = p
 	}
 
+	mediaRoot := os.Getenv("MEDIA_ROOT")
+
 	log.Println("Building index...")
 
 	index, err := pkg.NewIndex(getImageProvider())
@@ -40,7 +42,7 @@ func main() {
 
 	if len(os.Getenv("DEBUG")) > 0 {
 		go func() {
-			mux := api.New(index, "images")
+			mux := api.New(index, mediaRoot)
 
 			address := fmt.Sprintf(":%d", 8086)
 			log.Printf("UI: Listening on %s", address)
@@ -50,7 +52,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterImageSimilarityServiceServer(grpcServer, pb.NewImageSimilarityService(index))
+	pb.RegisterImageSimilarityServiceServer(grpcServer, pb.NewImageSimilarityService(index, mediaRoot))
 
 	log.Printf("GRPC: Listening on port :%d\n", port)
 	panic(grpcServer.Serve(listener))

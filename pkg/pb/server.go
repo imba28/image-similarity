@@ -10,6 +10,7 @@ import (
 
 type ImageSimilarityService struct {
 	index *pkg.ImageIndex
+	dir   string
 }
 
 func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (*ImageSimilarityResponse, error) {
@@ -67,6 +68,14 @@ func (s ImageSimilarityService) AddImage(c context.Context, i *Image) (*Image, e
 		Name: i.Name,
 	}
 
+	if len(s.dir) > 0 {
+		sep := "/"
+		if image.Path[0] == '/' || s.dir[len(s.dir)-1] == '/' {
+			sep = ""
+		}
+		image.Path = s.dir + sep + image.Path
+	}
+
 	err := s.index.Add(image)
 	if err != nil {
 		return nil, err
@@ -75,8 +84,9 @@ func (s ImageSimilarityService) AddImage(c context.Context, i *Image) (*Image, e
 	return i, nil
 }
 
-func NewImageSimilarityService(index *pkg.ImageIndex) ImageSimilarityService {
+func NewImageSimilarityService(index *pkg.ImageIndex, dir string) ImageSimilarityService {
 	return ImageSimilarityService{
 		index: index,
+		dir:   dir,
 	}
 }

@@ -70,7 +70,14 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			return
 		}
 
-		similarTemplate.Execute(w, imageDistances)
+		view := struct {
+			Images    []pkg.ImageDistance
+			MediaRoot string
+		}{
+			Images: imageDistances,
+		}
+
+		similarTemplate.Execute(w, view)
 	}
 }
 
@@ -80,6 +87,14 @@ func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		images := index.Images()
 		w.WriteHeader(200)
-		indexTemplate.Execute(w, images)
+
+		view := struct {
+			Images    []*pkg.Image
+			MediaRoot string
+		}{
+			Images: images,
+		}
+
+		indexTemplate.Execute(w, view)
 	}
 }
