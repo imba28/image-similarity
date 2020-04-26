@@ -3,6 +3,7 @@ module imba28/images
 go 1.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/golang-migrate/migrate/v4 v4.10.0
 	github.com/golang/protobuf v1.4.0
 	github.com/lib/pq v1.3.0

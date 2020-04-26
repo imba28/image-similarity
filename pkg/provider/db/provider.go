@@ -75,9 +75,8 @@ func (i *ImageProvider) Get(guid string) *pkg.Image {
 	}
 
 	var image pkg.Image
-	row := i.db.QueryRow("SELECT id, guid, name, path FROM photos WHERE guid = $1", guid)
-	err := row.Scan(&image.Id, &image.Guid, &image.Name, &image.Path)
-	if err != nil {
+	row := i.db.QueryRow("SELECT id, guid, name, path, vector FROM photos WHERE guid = $1", guid)
+	if err := row.Scan(&image.Id, &image.Guid, &image.Name, &image.Path, pq.Array(&image.Features)); err != nil {
 		return nil
 	}
 	return &image
