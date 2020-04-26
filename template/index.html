@@ -32,11 +32,11 @@
                     <ul class="list-group">
                         {{range .}}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="/similar/{{.Image.Id}}" class="btn btn-sm btn-outline-secondary">
-                                    {{.Image.Name}}
+                                <a href="/similar/{{.Guid}}" class="btn btn-sm btn-outline-secondary">
+                                    {{.Name}}
                                 </a>
                                 <div class="image-parent">
-                                    <img src="/{{.Image.Path}}" class="img-fluid" alt="quixote">
+                                    <img src="/{{.Path}}" class="img-fluid" alt="quixote">
                                 </div>
                             </li>
                         {{end}}

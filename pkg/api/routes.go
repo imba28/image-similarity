@@ -79,8 +79,8 @@ func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
 	indexTemplate := template.Must(template.ParseFiles("template/index.html"))
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		descriptors := index.Images()
+		images := index.Images()
 		w.WriteHeader(200)
-		indexTemplate.Execute(w, descriptors)
+		indexTemplate.Execute(w, images)
 	}
 }
