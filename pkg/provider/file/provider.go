@@ -3,6 +3,7 @@ package file
 import (
 	"imba28/images/pkg"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -19,6 +20,10 @@ func (f ImageProvider) Images() ([]*pkg.Image, error) {
 	var images []*pkg.Image
 
 	for _, file := range files {
+		if file.IsDir() || file.Mode()&os.ModeSymlink != 0 || (len(file.Name()) > 0 && file.Name()[0] == '.') {
+			continue
+		}
+
 		images = append(images, &pkg.Image{
 			Id:   file.Name(),
 			Path: f.dir + "/" + file.Name(),

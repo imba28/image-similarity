@@ -28,17 +28,14 @@ func CreateImageFixtures(db *sql.DB, dir string) error {
 	}
 
 	for i := range images {
-		if len(images[i].Name) > 0 && images[i].Name[0] == '.' {
-			continue
-		}
-		features, err := pkg.FeatureVector(images[i])
+		features, err := pkg.FeatureVector(*images[i])
 		if err != nil {
 			return err
 		}
 		images[i].Guid = i
 		images[i].Features = features
 		images[i].Id = ""
-		err = dbp.Persist(&images[i])
+		err = dbp.Persist(images[i])
 		if err != nil {
 			return err
 		}
