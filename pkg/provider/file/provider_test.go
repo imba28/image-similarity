@@ -14,6 +14,38 @@ func TestImageProvider_Images(t *testing.T) {
 	}
 }
 
+func TestImageProvider_Images_name(t *testing.T) {
+	provider := New("../../../template")
+
+	files, err := provider.Images()
+	expectedNames := []string{"index.html", "similar.html"}
+
+	if err != nil {
+		t.Error("ImageProvider should not return error")
+	}
+	for i := range files {
+		if files[i].Name != expectedNames[i] {
+			t.Errorf("Name of %dth file incorrect, got: %s, want %s", i, files[i].Name, expectedNames[i])
+		}
+	}
+}
+
+func TestImageProvider_Images_path(t *testing.T) {
+	provider := New("../../../template")
+
+	files, err := provider.Images()
+	expectedPaths := []string{"../../../template/index.html", "../../../template/similar.html"}
+
+	if err != nil {
+		t.Error("ImageProvider should not return error")
+	}
+	for i := range files {
+		if files[i].Path != expectedPaths[i] {
+			t.Errorf("Path of %dth file incorrect, got: %s, want %s", i, files[i].Path, expectedPaths[i])
+		}
+	}
+}
+
 func TestImageProvider_Images_hidden_files(t *testing.T) {
 	provider := New("../../../") // project root dir
 
