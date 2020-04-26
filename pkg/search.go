@@ -22,7 +22,7 @@ func (a ByDistance) Less(i, j int) bool {
 	return a[i].Distance < a[j].Distance
 }
 
-func CalculateDistances(referencePath Image, vectors []ImageDescriptor) ([]ImageDistance, error) {
+func CalculateDistances(referencePath Image, images []*Image) ([]ImageDistance, error) {
 	referenceVector, err := FeatureVector(referencePath)
 	if err != nil {
 		return nil, err
@@ -30,10 +30,10 @@ func CalculateDistances(referencePath Image, vectors []ImageDescriptor) ([]Image
 
 	var d []ImageDistance
 
-	for _, vector := range vectors {
+	for i := range images {
 		d = append(d, ImageDistance{
-			Image:    vector.Image,
-			Distance: chi2Distance(referenceVector, vector.Features),
+			Image:    *images[i],
+			Distance: chi2Distance(referenceVector, images[i].Features),
 		})
 	}
 

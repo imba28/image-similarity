@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS photos(
      guid    int not null,
      name          varchar(255)      NOT NULL,
      path          varchar(400)       NOT NULL,
-     vector        float8[] not null
+     vector        float8[] DEFAULT NULL
 );

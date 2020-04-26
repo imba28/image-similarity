@@ -13,11 +13,6 @@ const (
 	brightnessBins = 4
 )
 
-type ImageDescriptor struct {
-	Image    Image
-	Features []float64
-}
-
 func FeatureVector(i Image) ([]float64, error) {
 	img := gocv.IMRead(i.Path, gocv.IMReadColor)
 	if img.Empty() {

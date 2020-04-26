@@ -17,7 +17,7 @@ type ImageProvider struct {
 	db             *sql.DB
 }
 
-func (i *ImageProvider) Images() ([]pkg.Image, error) {
+func (i *ImageProvider) Images() ([]*pkg.Image, error) {
 	if i.db == nil {
 		if err := i.connect(); err != nil {
 			log.Printf("could not connect to db %q", err)
@@ -31,7 +31,7 @@ func (i *ImageProvider) Images() ([]pkg.Image, error) {
 	}
 	defer rows.Close()
 
-	var images []pkg.Image
+	var images []*pkg.Image
 	for rows.Next() {
 		var image pkg.Image
 		err = rows.Scan(&image.Id, &image.Guid, &image.Name, &image.Path)
@@ -39,7 +39,7 @@ func (i *ImageProvider) Images() ([]pkg.Image, error) {
 			return nil, err
 		}
 
-		images = append(images, image)
+		images = append(images, &image)
 	}
 
 	return images, nil

@@ -6,21 +6,22 @@ import (
 )
 
 type Image struct {
-	Id   string
-	Guid string
-	Path string
-	Name string
+	Id       string
+	Guid     string
+	Path     string
+	Name     string
+	Features []float64
 }
 
 type ImageProvider interface {
-	Images() ([]Image, error)
+	Images() ([]*Image, error)
 	Get(string) *Image
 }
 
 type ImageIndex struct {
-	provider    ImageProvider
-	descriptors []ImageDescriptor
-	imageMap    map[string]*Image
+	provider ImageProvider
+	images   []*Image
+	imageMap map[string]*Image
 }
 
 func (i *ImageIndex) Add(image *Image) error {
@@ -28,16 +29,17 @@ func (i *ImageIndex) Add(image *Image) error {
 		return nil
 	}
 
-	feature, err := FeatureVector(*image)
-	if err != nil {
-		return err
+	if image.Features == nil {
+		feature, err := FeatureVector(*image)
+		if err != nil {
+			return err
+		}
+
+		image.Features = feature
 	}
 
 	i.imageMap[image.Id] = image
-	i.descriptors = append(i.descriptors, ImageDescriptor{
-		Image:    *image,
-		Features: feature,
-	})
+	i.images = append(i.images, image)
 
 	return nil
 }
@@ -51,12 +53,12 @@ func (i ImageIndex) Load(id string) *Image {
 	return i.provider.Get(id)
 }
 
-func (i ImageIndex) Descriptors() []ImageDescriptor {
-	return i.descriptors
+func (i ImageIndex) Images() []*Image {
+	return i.images
 }
 
 func (i ImageIndex) Search(referenceImage Image, distanceThreshold float64, limit int) ([]ImageDistance, error) {
-	distances, err := CalculateDistances(referenceImage, i.descriptors)
+	distances, err := CalculateDistances(referenceImage, i.images)
 	if err != nil {
 		return nil, err
 	}
@@ -79,17 +81,17 @@ func NewIndex(p ImageProvider) (*ImageIndex, error) {
 		return nil, err
 	}
 
-	var imageDescriptors []ImageDescriptor
+	var imageDescriptors []*Image
 	imageMap := make(map[string]*Image, len(images))
 
 	imageIndex := &ImageIndex{
-		provider:    p,
-		descriptors: imageDescriptors,
-		imageMap:    imageMap,
+		provider: p,
+		images:   imageDescriptors,
+		imageMap: imageMap,
 	}
 
 	for i := range images {
-		err := imageIndex.Add(&images[i])
+		err := imageIndex.Add(images[i])
 		if err != nil {
 			fmt.Println(err)
 			continue
