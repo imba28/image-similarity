@@ -7,7 +7,7 @@ import (
 
 type Image struct {
 	Id       string
-	Guid     string
+	Guid     int
 	Path     string
 	Name     string
 	Features []float64
@@ -16,6 +16,7 @@ type Image struct {
 type ImageProvider interface {
 	Images() ([]*Image, error)
 	Get(string) *Image
+	Persist(*Image) error
 }
 
 type ImageIndex struct {

@@ -1,3 +1,4 @@
+BEGIN;
 CREATE TABLE IF NOT EXISTS photos(
      id  SERIAL PRIMARY KEY,
      guid    int not null,
@@ -5,3 +6,5 @@ CREATE TABLE IF NOT EXISTS photos(
      path          varchar(400)       NOT NULL,
      vector        float8[] DEFAULT NULL
 );
+CREATE UNIQUE INDEX ON photos(path);
+COMMIT;

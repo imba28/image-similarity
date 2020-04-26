@@ -34,6 +34,11 @@ func (f ImageProvider) Get(id string) *pkg.Image {
 	return &i
 }
 
+func (f ImageProvider) Persist(i *pkg.Image) error {
+	// noop
+	return nil
+}
+
 func NewImage(path string) pkg.Image {
 	parts := strings.Split(path, "/")
 	return pkg.Image{

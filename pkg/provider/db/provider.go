@@ -7,6 +7,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"imba28/images/pkg"
 	"log"
@@ -43,6 +44,26 @@ func (i *ImageProvider) Images() ([]*pkg.Image, error) {
 	}
 
 	return images, nil
+}
+
+func (p *ImageProvider) Persist(i *pkg.Image) error {
+	if p.db == nil {
+		if err := p.connect(); err != nil {
+			log.Printf("could not connect to db %q", err)
+			return nil
+		}
+	}
+
+	if len(i.Id) > 0 {
+		_, err := p.db.Exec("UPDATE photos SET guid = $1, name = $2, path = $3, vector = $4 WHERE id = $5", i.Guid, i.Name, i.Path, pq.Array(&i.Features), i.Id)
+		return err
+	} else {
+		err := p.db.QueryRow("INSERT INTO photos (guid, name, path, vector) VALUES ($1, $2, $3, $4)  RETURNING id", i.Guid, i.Name, i.Path, pq.Array(&i.Features)).Scan(&i.Id)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }
 
 func (i *ImageProvider) Get(guid string) *pkg.Image {
@@ -95,6 +116,12 @@ func (i *ImageProvider) migrate() error {
 func New(dataSourceString string) *ImageProvider {
 	return &ImageProvider{
 		dataSourceName: dataSourceString,
+	}
+}
+
+func NewFromDb(db *sql.DB) *ImageProvider {
+	return &ImageProvider{
+		db: db,
 	}
 }
 
