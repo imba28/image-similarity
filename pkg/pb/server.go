@@ -3,8 +3,8 @@ package pb
 import (
 	"context"
 	"errors"
-	"fmt"
 	"imba28/images/pkg"
+	"log"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ type ImageSimilarityService struct {
 func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (*ImageSimilarityResponse, error) {
 	image := s.index.Load(strconv.Itoa(int(r.Image.Guid)))
 
-	fmt.Printf("finding similar images to %d\n", r.Image.Guid)
+	log.Printf("[GRPC] \"%s %d\"", "GetSimilar", r.Image.Guid)
 
 	if image == nil {
 		return nil, errors.New("image not found")
@@ -30,7 +30,8 @@ func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (
 	for i := range imageDistances {
 		id, err := strconv.Atoi(imageDistances[i].Image.Id)
 		if err != nil {
-			fmt.Printf("Could not convert id %q to int!", imageDistances[i].Image.Id)
+			log.Printf("[GRPC] \"%s %d\" Could not convert id %q to int!", "GetSimilar", r.Image.Guid, imageDistances[i].Image.Id)
+			return nil, err
 		}
 		images = append(images, &ImageSimilarity{
 			Image:    &Image{Guid: int32(id), Path: imageDistances[i].Image.Path},
@@ -49,15 +50,21 @@ func (s ImageSimilarityService) AddImage(c context.Context, i *Image) (*Image, e
 		return nil, errors.New("image not found")
 	}
 	id := strconv.Itoa(int(i.Guid))
-	fmt.Printf("adding image %d to the index.\n", i.Guid)
+	log.Printf("[GRPC] \"%s %s\"", "AddImage", id)
 
 	if s.index.Has(id) {
 		return i, nil
 	}
 
 	image := s.index.Load(id)
-	if image == nil {
-		return nil, errors.New("image not found")
+	if image != nil {
+		return i, nil
+	}
+
+	image = &pkg.Image{
+		Guid: int(i.Guid),
+		Path: i.Path,
+		Name: i.Name,
 	}
 
 	err := s.index.Add(image)
