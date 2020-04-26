@@ -20,6 +20,7 @@ RUN go build -o api ./cmd/grpc/main.go
 FROM imba28/gocv:1.13
 
 COPY --from=builder /app/api /api
+COPY --from=builder /app/migrations /migrations
 COPY --from=builder /app/template /template
 
 EXPOSE 8080
