@@ -72,7 +72,7 @@ func (i ImageIndex) Search(referenceImage Image, distanceThreshold float64, limi
 	var results []ImageDistance
 
 	for i, distance := range distances {
-		if distance.Distance > distanceThreshold || i > limit {
+		if distance.Distance > distanceThreshold || i >= limit {
 			break
 		}
 		results = append(results, distance)

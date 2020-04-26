@@ -26,7 +26,7 @@ func (i *ImageProvider) Images() ([]*pkg.Image, error) {
 		}
 	}
 
-	rows, err := i.db.Query("SELECT id, guid, name, path FROM photos ORDER BY id DESC")
+	rows, err := i.db.Query("SELECT id, guid, name, path, vector FROM photos ORDER BY id DESC")
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (i *ImageProvider) Images() ([]*pkg.Image, error) {
 	var images []*pkg.Image
 	for rows.Next() {
 		var image pkg.Image
-		err = rows.Scan(&image.Id, &image.Guid, &image.Name, &image.Path)
+		err = rows.Scan(&image.Id, &image.Guid, &image.Name, &image.Path, pq.Array(&image.Features))
 		if err != nil {
 			return nil, err
 		}

@@ -13,17 +13,17 @@ func TestImageProvider_Images(t *testing.T) {
 	}
 	defer db.Close()
 
-	rows := sqlmock.NewRows([]string{"id", "guid", "name", "path"}).
-		AddRow(1, "10", "first photo", "/images/10.png").
-		AddRow(2, "11", "second photo", "/images/11.png").
-		AddRow(3, "12", "third photo", "/images/12.png")
+	rows := sqlmock.NewRows([]string{"id", "guid", "name", "path", "vector"}).
+		AddRow(1, "10", "first photo", "/images/10.png", nil).
+		AddRow(2, "11", "second photo", "/images/11.png", "{0,1,2,3,4}").
+		AddRow(3, "12", "third photo", "/images/12.png", "{1,3,5,7,11}")
 
-	mock.ExpectQuery("SELECT id, guid, name, path FROM photos ORDER BY id DESC").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT (.+) FROM photos ORDER BY id DESC").WillReturnRows(rows)
 	provider := NewFromDb(db)
 
 	images, err := provider.Images()
 	if err != nil {
-		t.Error("ImageProvider should not return error")
+		t.Errorf("ImageProvider should not return error, got: %q", err)
 	}
 	if len(images) != 3 {
 		t.Errorf("Length of images incorrect, got: %d, want: %d", len(images), 3)
@@ -33,6 +33,11 @@ func TestImageProvider_Images(t *testing.T) {
 	idTests := []string{"1", "2", "3"}
 	guidTests := []int{10, 11, 12}
 	pathTest := []string{"/images/10.png", "/images/11.png", "/images/12.png"}
+	featureTest := [][]float64{
+		nil,
+		{0, 1, 2, 3, 4},
+		{1, 3, 5, 7, 11},
+	}
 
 	for i, image := range images {
 		if image.Name != nameTests[i] {
@@ -47,8 +52,18 @@ func TestImageProvider_Images(t *testing.T) {
 		if image.Path != pathTest[i] {
 			t.Errorf("Path of %dth image incorrect, got: %s, want: %s", i, image.Path, pathTest[i])
 		}
-		if image.Features != nil {
-			t.Errorf("Feature vector of %dth image incorrect, got: %v, want: %v", i, image.Features, nil)
+		if featureTest[i] == nil && image.Features != nil {
+			t.Errorf("Feature vector of %dth image incorrect, got: %v, want: %v", i, image.Features, featureTest[i])
+		} else {
+			if len(image.Features) != len(featureTest[i]) {
+				t.Errorf("Feature vectors have different length, got: %v, want: %v", image.Features, featureTest[i])
+			} else {
+				for j := range featureTest[i] {
+					if image.Features[j]-featureTest[i][j] >= 1e-9 || featureTest[i][j]-image.Features[j] >= 1e-9 {
+						t.Errorf("Incorrect %dth feature vector item of image %d, got: %f, want: %f", j, i, image.Features[j], featureTest[i][j])
+					}
+				}
+			}
 		}
 	}
 }
@@ -63,7 +78,7 @@ func TestImageProvider_Get(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"id", "guid", "name", "path", "vector"}).
 		AddRow(1, "10", "first photo", "/images/10.png", nil)
 
-	mock.ExpectQuery("SELECT id, guid, name, path, vector FROM photos WHERE guid = ?").WithArgs("10").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT (.+) FROM photos WHERE guid = ?").WithArgs("10").WillReturnRows(rows)
 
 	provider := NewFromDb(db)
 
@@ -100,7 +115,7 @@ func TestImageProvider_Get_features(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"id", "guid", "name", "path", "vector"}).
 		AddRow(1, "10", "first photo", "/images/10.png", "{0,1,2,3,4,5,6,7,8,9}")
 
-	mock.ExpectQuery("SELECT id, guid, name, path, vector FROM photos WHERE guid = ?").WithArgs("10").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT (.+) FROM photos WHERE guid = ?").WithArgs("10").WillReturnRows(rows)
 
 	provider := NewFromDb(db)
 
