@@ -8,10 +8,10 @@ import (
 func New(index *pkg.ImageIndex, staticFolder string) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/v1/similar/", SimilarPhotosJsonHandler(index))
-	mux.HandleFunc("/similar/", SimilarPhotosHandler(index))
+	mux.Handle("/api/v1/similar/", LoggingMiddleware(SimilarPhotosJsonHandler(index)))
+	mux.Handle("/similar/", LoggingMiddleware(SimilarPhotosHandler(index)))
 	mux.Handle("/"+staticFolder+"/", http.StripPrefix("/"+staticFolder+"/", http.FileServer(http.Dir(staticFolder))))
-	mux.HandleFunc("/", IndexHandler(index))
+	mux.Handle("/", LoggingMiddleware(IndexHandler(index)))
 
 	return mux
 }
