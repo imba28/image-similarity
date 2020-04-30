@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-type ImageProvider struct {
+type SingleLevelImageProvider struct {
 	dir string
 }
 
-func (f ImageProvider) Images() ([]*pkg.Image, error) {
+func (f SingleLevelImageProvider) Images() ([]*pkg.Image, error) {
 	files, err := ioutil.ReadDir(f.dir)
 	if err != nil {
 		return nil, err
@@ -34,17 +34,17 @@ func (f ImageProvider) Images() ([]*pkg.Image, error) {
 	return images, nil
 }
 
-func (f ImageProvider) Get(id string) *pkg.Image {
-	i := NewImage(f.dir + "/" + strings.Trim(id, "\n"))
+func (f SingleLevelImageProvider) Get(id string) *pkg.Image {
+	i := newImage(f.dir + "/" + strings.Trim(id, "\n"))
 	return &i
 }
 
-func (f ImageProvider) Persist(i *pkg.Image) error {
+func (f SingleLevelImageProvider) Persist(i *pkg.Image) error {
 	// noop
 	return nil
 }
 
-func NewImage(path string) pkg.Image {
+func newImage(path string) pkg.Image {
 	parts := strings.Split(path, "/")
 	return pkg.Image{
 		Id:   parts[len(parts)-1],
@@ -53,8 +53,8 @@ func NewImage(path string) pkg.Image {
 	}
 }
 
-func New(dir string) ImageProvider {
-	return ImageProvider{dir: dir}
+func NewSingleLevelProvider(dir string) SingleLevelImageProvider {
+	return SingleLevelImageProvider{dir: dir}
 }
 
-var _ pkg.ImageProvider = (*ImageProvider)(nil)
+var _ pkg.ImageProvider = (*SingleLevelImageProvider)(nil)

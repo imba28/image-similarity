@@ -19,7 +19,7 @@ func CreateImageFixtures(db *sql.DB, dir string) error {
 		return errors.New("database already contains entries. You should drop it first")
 	}
 
-	p := file.New(dir)
+	p := file.NewSingleLevelProvider(dir)
 	dbp := dbprovider.NewFromDb(db)
 
 	images, err := p.Images()

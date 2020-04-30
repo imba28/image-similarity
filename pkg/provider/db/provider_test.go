@@ -1,10 +1,11 @@
 package dbprovider
 
 import (
+	"errors"
+	"github.com/DATA-DOG/go-sqlmock"
 	"imba28/images/pkg"
 	"testing"
 )
-import "github.com/DATA-DOG/go-sqlmock"
 
 func TestUnitImageProvider_Images(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -170,7 +171,7 @@ func TestUnitImageProvider_Persist__id(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectQuery("INSERT INTO photos \\(guid, name, path, vector\\) VALUES \\((.+)\\)  RETURNING id").
+	mock.ExpectQuery("INSERT INTO photos \\((.+)\\) VALUES \\((.+)\\) RETURNING id").
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(10))
 
 	image := &pkg.Image{
@@ -186,5 +187,59 @@ func TestUnitImageProvider_Persist__id(t *testing.T) {
 	}
 	if image.Id != "10" {
 		t.Errorf("Invalid id set after persisting object, got: %v, want: %v", image.Id, 10)
+	}
+}
+
+func TestUnitImageProvider_db_error(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	expectedErr := errors.New("could not read")
+	mock.ExpectQuery("SELECT (.+) FROM photos ORDER BY id DESC").
+		WillReturnError(expectedErr)
+	mock.ExpectExec("UPDATE photos SET (.+) WHERE id = \\$5").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(expectedErr)
+	mock.ExpectQuery("INSERT INTO photos \\((.+)\\) VALUES \\((.+)\\)  RETURNING id").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(expectedErr)
+
+	provider := NewFromDb(db)
+
+	is, err := provider.Images()
+	if err != expectedErr || is != nil {
+		t.Errorf("Expected query to throw error, expected: %v, got: %v", expectedErr, err)
+	}
+
+	i := provider.Get("foobar.png")
+	if i != nil {
+		t.Errorf("Expected row query to throw error, expected: %v, got: %v", expectedErr, err)
+	}
+
+	err = provider.Persist(&pkg.Image{
+		Id:   "1",
+		Guid: 1,
+		Path: "/foobar.png",
+		Name: "foobar.png",
+	})
+	if err != expectedErr {
+		t.Errorf("Expected updating query to throw error, expected: %v, got: %v", expectedErr, err)
+	}
+
+	image := &pkg.Image{
+		Guid: 1,
+		Path: "/foobar.png",
+		Name: "foobar.png",
+	}
+	err = provider.Persist(image)
+	if err != expectedErr {
+		t.Errorf("Expected inserting query to throw error, expected: %v, got: %v", expectedErr, err)
+	}
+
+	if image.Id != "" {
+		t.Errorf("Expected inserting query to NOT update the id, expected: %v, got: %v", "", image.Id)
 	}
 }

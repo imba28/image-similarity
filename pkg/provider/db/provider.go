@@ -58,11 +58,7 @@ func (p *ImageProvider) Persist(i *pkg.Image) error {
 		_, err := p.db.Exec("UPDATE photos SET guid = $1, name = $2, path = $3, vector = $4 WHERE id = $5", i.Guid, i.Name, i.Path, pq.Array(&i.Features), i.Id)
 		return err
 	} else {
-		err := p.db.QueryRow("INSERT INTO photos (guid, name, path, vector) VALUES ($1, $2, $3, $4)  RETURNING id", i.Guid, i.Name, i.Path, pq.Array(&i.Features)).Scan(&i.Id)
-		if err != nil {
-			return err
-		}
-		return nil
+		return p.db.QueryRow("INSERT INTO photos (guid, name, path, vector) VALUES ($1, $2, $3, $4)  RETURNING id", i.Guid, i.Name, i.Path, pq.Array(&i.Features)).Scan(&i.Id)
 	}
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 func TestUnitImageProvider_Get(t *testing.T) {
-	provider := New("../../../template")
+	provider := NewSingleLevelProvider("../../../template")
 	image := provider.Get("index.html")
 
 	if image == nil {
@@ -32,19 +32,31 @@ func TestUnitImageProvider_Get(t *testing.T) {
 }
 
 func TestUnitImageProvider_Images(t *testing.T) {
-	provider := New("../../../template")
+	provider := NewSingleLevelProvider("../../../template")
 
 	files, err := provider.Images()
 	if err != nil {
-		t.Error("ImageProvider should not return error")
+		t.Error("SingleLevelImageProvider should not return error")
 	}
 	if len(files) != 2 {
 		t.Errorf("Length of files incorrect, got: %d, want: %d", len(files), 2)
 	}
+
+	provider = NewSingleLevelProvider("../../../test_sets")
+
+	files, err = provider.Images()
+	if err != nil {
+		t.Error("SingleLevelImageProvider should not return error")
+	}
+
+	// single level file provider should only look at the top most level of the directory
+	if len(files) != 1 {
+		t.Errorf("Length of files in dir /test_sets incorrect, got: %d, want: %d", len(files), 1)
+	}
 }
 
 func TestUnitImageProvider_Images_not_existing(t *testing.T) {
-	provider := New("../foobar")
+	provider := NewSingleLevelProvider("../foobar")
 	_, err := provider.Images()
 	if err == nil {
 		t.Errorf("if directory does not exist Images() should return an error")
@@ -52,13 +64,13 @@ func TestUnitImageProvider_Images_not_existing(t *testing.T) {
 }
 
 func TestUnitImageProvider_Images_name(t *testing.T) {
-	provider := New("../../../template")
+	provider := NewSingleLevelProvider("../../../template")
 
 	files, err := provider.Images()
 	expectedNames := []string{"index.html", "similar.html"}
 
 	if err != nil {
-		t.Error("ImageProvider should not return error")
+		t.Error("SingleLevelImageProvider should not return error")
 	}
 	for i := range files {
 		if files[i].Name != expectedNames[i] {
@@ -68,13 +80,13 @@ func TestUnitImageProvider_Images_name(t *testing.T) {
 }
 
 func TestUnitImageProvider_Images_path(t *testing.T) {
-	provider := New("../../../template")
+	provider := NewSingleLevelProvider("../../../template")
 
 	files, err := provider.Images()
 	expectedPaths := []string{"../../../template/index.html", "../../../template/similar.html"}
 
 	if err != nil {
-		t.Error("ImageProvider should not return error")
+		t.Error("SingleLevelImageProvider should not return error")
 	}
 	for i := range files {
 		if files[i].Path != expectedPaths[i] {
@@ -84,11 +96,11 @@ func TestUnitImageProvider_Images_path(t *testing.T) {
 }
 
 func TestUnitImageProvider_Images_hidden_files(t *testing.T) {
-	provider := New("../../../") // project root dir
+	provider := NewSingleLevelProvider("../../../") // project root dir
 
 	files, err := provider.Images()
 	if err != nil {
-		t.Error("ImageProvider should not return error")
+		t.Error("SingleLevelImageProvider should not return error")
 	}
 	if len(files) != 5 {
 		t.Errorf("Length of files non hidden files incorrect, got: %d, want: %d", len(files), 5)
@@ -96,7 +108,7 @@ func TestUnitImageProvider_Images_hidden_files(t *testing.T) {
 }
 
 func TestUnitImageProvider_Persist(t *testing.T) {
-	provider := New("../../../") // project root dir
+	provider := NewSingleLevelProvider("../../../") // project root dir
 	image := pkg.Image{
 		Id:       "2",
 		Guid:     2,
@@ -110,7 +122,7 @@ func TestUnitImageProvider_Persist(t *testing.T) {
 }
 
 func TestUnitNewImage(t *testing.T) {
-	image := NewImage("/locations/foo/hello-world.png")
+	image := newImage("/locations/foo/hello-world.png")
 	if image.Name != "hello-world.png" {
 		t.Errorf("incorrect image name, got: %q, want: %q", image.Name, "hello-world.png")
 	}
