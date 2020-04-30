@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestImageProvider_Get(t *testing.T) {
+func TestUnitImageProvider_Get(t *testing.T) {
 	provider := New("../../../template")
 	image := provider.Get("index.html")
 
@@ -31,7 +31,7 @@ func TestImageProvider_Get(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Images(t *testing.T) {
+func TestUnitImageProvider_Images(t *testing.T) {
 	provider := New("../../../template")
 
 	files, err := provider.Images()
@@ -43,7 +43,7 @@ func TestImageProvider_Images(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Images_not_existing(t *testing.T) {
+func TestUnitImageProvider_Images_not_existing(t *testing.T) {
 	provider := New("../foobar")
 	_, err := provider.Images()
 	if err == nil {
@@ -51,7 +51,7 @@ func TestImageProvider_Images_not_existing(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Images_name(t *testing.T) {
+func TestUnitImageProvider_Images_name(t *testing.T) {
 	provider := New("../../../template")
 
 	files, err := provider.Images()
@@ -67,7 +67,7 @@ func TestImageProvider_Images_name(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Images_path(t *testing.T) {
+func TestUnitImageProvider_Images_path(t *testing.T) {
 	provider := New("../../../template")
 
 	files, err := provider.Images()
@@ -83,7 +83,7 @@ func TestImageProvider_Images_path(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Images_hidden_files(t *testing.T) {
+func TestUnitImageProvider_Images_hidden_files(t *testing.T) {
 	provider := New("../../../") // project root dir
 
 	files, err := provider.Images()
@@ -95,7 +95,7 @@ func TestImageProvider_Images_hidden_files(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Persist(t *testing.T) {
+func TestUnitImageProvider_Persist(t *testing.T) {
 	provider := New("../../../") // project root dir
 	image := pkg.Image{
 		Id:       "2",
@@ -109,7 +109,7 @@ func TestImageProvider_Persist(t *testing.T) {
 	}
 }
 
-func TestNewImage(t *testing.T) {
+func TestUnitNewImage(t *testing.T) {
 	image := NewImage("/locations/foo/hello-world.png")
 	if image.Name != "hello-world.png" {
 		t.Errorf("incorrect image name, got: %q, want: %q", image.Name, "hello-world.png")

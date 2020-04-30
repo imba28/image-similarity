@@ -6,7 +6,7 @@ import (
 )
 import "github.com/DATA-DOG/go-sqlmock"
 
-func TestImageProvider_Images(t *testing.T) {
+func TestUnitImageProvider_Images(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -68,7 +68,7 @@ func TestImageProvider_Images(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Get(t *testing.T) {
+func TestUnitImageProvider_Get(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -105,7 +105,7 @@ func TestImageProvider_Get(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Get_features(t *testing.T) {
+func TestUnitImageProvider_Get_features(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -132,6 +132,7 @@ func TestImageProvider_Get_features(t *testing.T) {
 	if len(image.Features) != 10 {
 		t.Errorf("Incorrect feature vector, got: %v, want %v", image.Features, []float64{0, 1, 2, 3, 4, 5, 6, 7, 9})
 	}
+
 	for i := 0; i < 10; i++ {
 		if image.Features[i]-float64(i) >= 1e-9 || float64(i)-image.Features[i] >= 1e-9 {
 			t.Errorf("Incorrect %dth feature vector item, got: %f, want: %f", i, image.Features[i], float64(i))
@@ -139,7 +140,7 @@ func TestImageProvider_Get_features(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Persist(t *testing.T) {
+func TestUnitImageProvider_Persist(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -162,7 +163,7 @@ func TestImageProvider_Persist(t *testing.T) {
 	}
 }
 
-func TestImageProvider_Persist__id(t *testing.T) {
+func TestUnitImageProvider_Persist__id(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)

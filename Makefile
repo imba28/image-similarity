@@ -1,8 +1,5 @@
 all: proto build
 
-test:
-	go test ./...
-
 build:
 	go build -o api ./cmd/grpc/main.go
 
@@ -12,6 +9,12 @@ proto:
 
 migrate:
 	migrate -database ${DATABASE_URL} -path db/migrations up
+
+test:
+	go test -run 'TestUnit' ./...
+
+test_integration:
+	go test -run 'TestIntegration' ./...
 
 cover:
 	go test -cover ./...
