@@ -1,5 +1,4 @@
 images
-opencv
-opencv_contrib
 tmp
 locations
+.git
