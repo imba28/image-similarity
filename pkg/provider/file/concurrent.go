@@ -4,6 +4,7 @@ import (
 	"imba28/images/pkg"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"sync"
 )
 
@@ -11,72 +12,87 @@ type ConcurrentImageProvider struct {
 	Dir string
 }
 
-func listDir(c chan<- pkg.Image, wg *sync.WaitGroup, info os.FileInfo, path string) {
-	if info.IsDir() {
-		fs, _ := ioutil.ReadDir(path + "/" + info.Name())
-		for _, f := range fs {
-			if f.Name()[0] != '.' {
-				wg.Add(1)
-				go func(f os.FileInfo) {
-					listDir(c, wg, f, path+"/"+info.Name())
-				}(f)
+func workerPool(workerCount int, filePool <-chan *pkg.Image, resultPool chan<- *pkg.Image, wg *sync.WaitGroup, exit chan bool) {
+	signals := make([]chan bool, workerCount)
+
+	for i := 0; i < workerCount; i++ {
+		signals[i] = make(chan bool)
+		go func(stopSignal <-chan bool) {
+			for {
+				select {
+				case image := <-filePool:
+					f, err := pkg.FeatureVector(*image)
+					if err == nil {
+						image.Features = f
+						resultPool <- image
+					} else {
+						resultPool <- nil
+					}
+				case <-stopSignal:
+					return
+				}
 			}
-		}
-		wg.Done()
+		}(signals[i])
+	}
+
+	<-exit
+	for i := range signals {
+		signals[i] <- true
+	}
+}
+
+func readDir(path string, imagePool chan *pkg.Image, wg *sync.WaitGroup) {
+	fs, err := ioutil.ReadDir(path)
+	if err != nil {
 		return
 	}
 
-	image := pkg.Image{
-		Name: info.Name(),
-		Path: path + "/" + info.Name(),
-	}
+	for _, f := range fs {
+		if f.IsDir() {
+			readDir(path+"/"+f.Name(), imagePool, wg)
+			continue
+		}
 
-	f, err := pkg.FeatureVector(image)
-	if err == nil {
-		image.Features = f
-		c <- image
+		wg.Add(1)
+		image := &pkg.Image{
+			Name: f.Name(),
+			Path: path + "/" + f.Name(),
+		}
+		imagePool <- image
 	}
-	wg.Done()
 }
 
 func (c ConcurrentImageProvider) Images() ([]*pkg.Image, error) {
-	fs, err := ioutil.ReadDir(c.Dir)
-	if err != nil {
-		return nil, err
-	}
-
-	imageChannel := make(chan pkg.Image, 8)
-	allDone := make(chan bool)
-
+	cores := runtime.NumCPU()
+	imagePool := make(chan *pkg.Image, 10)
+	resultPool := make(chan *pkg.Image, 10)
+	done := make(chan bool)
+	doneWorker := make(chan bool)
 	var wg sync.WaitGroup
+	var l []*pkg.Image
 
-	// launch a go routine for each file
-	for _, f := range fs {
-		wg.Add(1)
-		go func(f os.FileInfo) {
-			listDir(imageChannel, &wg, f, c.Dir)
-		}(f)
-	}
-
-	var list []*pkg.Image
-
+	go workerPool(cores, imagePool, resultPool, &wg, doneWorker)
 	go func() {
-		// when all routines finished notify the main routine
-		wg.Wait()
-		allDone <- true
+		for {
+			select {
+			case image := <-resultPool:
+				if image != nil {
+					l = append(l, image)
+				}
+				wg.Done()
+			case <-done:
+				return
+			}
+		}
 	}()
 
-	for {
-		select {
-		case image := <-imageChannel:
-			// a routine successfully calculated a feature vector. We should add it to the list
-			list = append(list, &image)
+	readDir(c.Dir, imagePool, &wg)
+	wg.Wait()
 
-		case <-allDone:
-			// all routines are done and the list is complete
-			return list, nil
-		}
-	}
+	doneWorker <- true
+	done <- true
+
+	return l, nil
 }
 
 func (c ConcurrentImageProvider) Get(path string) *pkg.Image {

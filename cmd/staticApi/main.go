@@ -26,7 +26,7 @@ func main() {
 	}
 
 	fmt.Println("Building index...")
-	index, err := pkg.NewIndex(file.NewSingleLevelProvider(*dir))
+	index, err := pkg.NewIndex(file.ConcurrentImageProvider{Dir: *dir})
 	if err != nil {
 		fmt.Printf("could not open image directory %q\n", *dir)
 		return

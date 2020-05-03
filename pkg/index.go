@@ -1,6 +1,11 @@
 package pkg
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrAlreadyAdded = errors.New("image does already exist")
 
 type Image struct {
 	Id       string
@@ -23,8 +28,11 @@ type ImageIndex struct {
 }
 
 func (i *ImageIndex) Add(image *Image) error {
-	if image == nil || i.Has(image.Id) {
+	if image == nil {
 		return nil
+	}
+	if i.Has(image.Id) {
+		return ErrAlreadyAdded
 	}
 
 	if image.Features == nil {

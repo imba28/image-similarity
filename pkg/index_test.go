@@ -99,8 +99,8 @@ func TestUnitImageIndex_Add__existing(t *testing.T) {
 		Name:     "test1.png",
 		Features: []float64{1, 2, 3, 4, 5},
 	})
-	if err != nil {
-		t.Error("Add should not return error, because image already exists")
+	if err != ErrAlreadyAdded {
+		t.Errorf("Add should return error because image already exists, got: %v", err)
 	}
 	if len(index.images) != 3 {
 		t.Error("Expected Add to not append the image to the list because it is already contained")

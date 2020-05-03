@@ -1,7 +1,9 @@
 package pkg
 
 import (
+	"errors"
 	"math"
+	"runtime"
 	"sort"
 )
 
@@ -22,19 +24,38 @@ func (a ByDistance) Less(i, j int) bool {
 	return a[i].Distance < a[j].Distance
 }
 
-func CalculateDistances(reference Image, images []*Image) ([]ImageDistance, error) {
-	var d []ImageDistance
-
-	for i := range images {
-		d = append(d, ImageDistance{
+func calculateRange(reference *Image, images []*Image, from int, to int, dc chan<- *ImageDistance) {
+	for i := from; i < to; i++ {
+		dc <- &ImageDistance{
 			Image:    *images[i],
 			Distance: chi2Distance(reference.Features, images[i].Features),
-		})
+		}
+	}
+}
+
+func CalculateDistances(reference Image, images []*Image) ([]ImageDistance, error) {
+	var d []ImageDistance
+	distanceChannel := make(chan *ImageDistance, 20)
+	defer close(distanceChannel)
+
+	availableCores := float64(runtime.NumCPU())
+	logLen := math.Ceil(math.Log10(float64(len(images))))
+	routineCount := int(math.Min(logLen, availableCores))
+	routineCalculationRange := len(images) / routineCount
+
+	for i := 0; i < routineCount; i++ {
+		go calculateRange(&reference, images, i*routineCalculationRange, (i+1)*routineCalculationRange, distanceChannel)
 	}
 
-	sort.Sort(ByDistance(d))
+	for distance := range distanceChannel {
+		d = append(d, *distance)
+		if len(d) == len(images) {
+			sort.Sort(ByDistance(d))
+			return d, nil
+		}
+	}
 
-	return d, nil
+	return nil, errors.New("shit, this should not have happened")
 }
 
 func chi2Distance(v1, v2 []float64) float64 {
