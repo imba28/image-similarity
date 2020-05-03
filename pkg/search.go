@@ -44,7 +44,11 @@ func CalculateDistances(reference Image, images []*Image) ([]ImageDistance, erro
 	routineCalculationRange := len(images) / routineCount
 
 	for i := 0; i < routineCount; i++ {
-		go calculateRange(&reference, images, i*routineCalculationRange, (i+1)*routineCalculationRange, distanceChannel)
+		endIndex := (i + 1) * routineCalculationRange
+		if i+1 == routineCount && len(images)%routineCount != 0 {
+			endIndex = len(images)
+		}
+		go calculateRange(&reference, images, i*routineCalculationRange, endIndex, distanceChannel)
 	}
 
 	for distance := range distanceChannel {
