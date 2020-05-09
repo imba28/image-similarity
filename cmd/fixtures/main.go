@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	db2 "imba28/images/internal/db"
 	"log"
@@ -9,12 +10,15 @@ import (
 )
 
 func main() {
+	dir := flag.String("directory", "test_sets", "directory containing images")
+	flag.Parse()
+
 	db, err := sql.Open("postgres", dsn())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db2.CreateImageFixtures(db, "locations")
+	err = db2.CreateImageFixtures(db, *dir)
 	if err != nil {
 		log.Fatal(err)
 	}
