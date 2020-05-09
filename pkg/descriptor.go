@@ -27,7 +27,7 @@ func FeatureVector(i Image) ([]float64, error) {
 	white := color.RGBA{255, 255, 255, 0}
 
 	width, height := img.Size()[1], img.Size()[0]
-	cx, cy := int(width/2), int(height/2)
+	cx, cy := width/2, height/2
 
 	segments := [][]int{
 		{0, 0, cx, cy},          // top left
@@ -56,17 +56,16 @@ func FeatureVector(i Image) ([]float64, error) {
 		gocv.Rectangle(&segmentMask, image.Rect(segment[0], segment[1], segment[2], segment[3]), white, -1)
 		gocv.Subtract(segmentMask, ellipMask, &segmentMask)
 
-		ShowMask(segmentMask)
+		// ShowMask(segmentMask)
 
 		segmentFeatures, err := featuresInSegment(img, segmentMask, segmentHistogram)
 		if err != nil {
 			return nil, err
 		}
-
 		features = append(features, segmentFeatures...)
 	}
 
-	ShowMask(ellipMask)
+	// ShowMask(ellipMask)
 
 	ellipFeatures, err := featuresInSegment(img, ellipMask, segmentHistogram)
 	if err != nil {
@@ -90,6 +89,12 @@ func featuresInSegment(img gocv.Mat, mask gocv.Mat, hist gocv.Mat) ([]float64, e
 	float64Hist := gocv.NewMat()
 	defer float64Hist.Close()
 	hist.ConvertTo(&float64Hist, gocv.MatTypeCV64F)
+	f, err := float64Hist.DataPtrFloat64()
 
-	return float64Hist.DataPtrFloat64()
+	// copy slice to golang memory, because after returning from this function the allocated memory is released.
+	// accessing the underlying array would result in undefined behaviour.
+	fCopy := make([]float64, len(f))
+	copy(fCopy, f)
+
+	return fCopy, err
 }
