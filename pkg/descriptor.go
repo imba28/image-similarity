@@ -18,6 +18,7 @@ func FeatureVector(i Image) ([]float64, error) {
 	if img.Empty() {
 		return nil, fmt.Errorf("error reading image from %q\n", i.Path)
 	}
+	defer img.Close()
 
 	// convert img to hsv color space
 	img.ConvertTo(&img, gocv.ColorBGRToHSV)
