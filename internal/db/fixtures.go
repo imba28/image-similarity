@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"imba28/images/pkg"
 	dbprovider "imba28/images/pkg/provider/db"
 	"imba28/images/pkg/provider/file"
@@ -37,7 +38,7 @@ func CreateImageFixtures(db *sql.DB, dir string) error {
 		images[i].Id = ""
 		err = dbp.Persist(images[i])
 		if err != nil {
-			return err
+			fmt.Println("error saving image", images[i].Path, err)
 		}
 	}
 
