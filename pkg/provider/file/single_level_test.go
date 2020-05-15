@@ -102,8 +102,8 @@ func TestUnitImageProvider_Images_hidden_files(t *testing.T) {
 	if err != nil {
 		t.Error("SingleLevelImageProvider should not return error")
 	}
-	if len(files) != 6 {
-		t.Errorf("Length of files non hidden files incorrect, got: %d, want: %d", len(files), 6)
+	if len(files) != 7 {
+		t.Errorf("Length of files non hidden files incorrect, got: %d, want: %d", len(files), 7)
 	}
 
 	provider = NewSingleLevelProvider("../../../test_sets") // image test set directory

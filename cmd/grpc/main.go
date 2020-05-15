@@ -7,6 +7,7 @@ import (
 	"imba28/images/pkg/api"
 	"imba28/images/pkg/pb"
 	dbprovider "imba28/images/pkg/provider/db"
+	"imba28/images/pkg/provider/file"
 	"log"
 	"net"
 	"net/http"
@@ -61,7 +62,10 @@ func main() {
 func getImageProvider() pkg.ImageProvider {
 	if len(os.Getenv("DATABASE_URL")) > 0 {
 		return dbprovider.New(os.Getenv("DATABASE_URL"))
-	} else {
+	} else if len(os.Getenv("POSTGRES_HOST")) > 0 {
 		return dbprovider.NewFromCredentials(os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), 5432, os.Getenv("POSTGRES_DB"))
 	}
+	return file.NewImageGuidProvider(file.ConcurrentImageProvider{
+		Dir: "test_sets",
+	})
 }

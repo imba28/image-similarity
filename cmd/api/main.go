@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	dir := flag.String("directory", "test_images", "Directory that contains the images set")
+	dir := flag.String("directory", "test_sets", "Directory that contains the images set")
 	dataSourceString := flag.String("postgres_url", "", "postgres data source string")
 	port := flag.Uint("port", 8080, "Port to bind http server to")
 	flag.Parse()
