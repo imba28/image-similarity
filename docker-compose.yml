@@ -1,0 +1,14 @@
+version: '3'
+services:
+  pg:
+    image: postgres:11
+    container_name: mmp-postgres
+    env_file:
+      - .env
+    volumes:
+      - pg-data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+
+volumes:
+  pg-data:
