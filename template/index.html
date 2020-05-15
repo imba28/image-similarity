@@ -43,6 +43,15 @@
                     </ul>
                 </div>
             </div>
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination">
+                    {{range .Pages}}
+                        <li class="page-item{{if eq . $.Page}} active{{end}}">
+                            <a class="page-link" href="/?page={{.}}">{{.}}</a>
+                        </li>
+                    {{end}}
+                </ul>
+            </nav>
         </div>
     </div>
 </main>
