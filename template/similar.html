@@ -23,8 +23,19 @@
     <div class="album py-5 bg-light">
         <div class="container">
             <div class="row">
+                <div class="card">
+                    <img src="/media/{{.Image.Path}}" class="card-img-top" alt="{{.Image.Name}}">
+                    <div class="card-body">
+                        <p class="card-text">{{.Image.Name}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h3>Similar images</h3>
+                </div>
                 {{range .Images}}
-                    <div class="col-md-4">
+                    <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="card mb-4 shadow-sm">
                             <img class="bd-placeholder-img card-img-top" src="/media/{{.Image.Path}}" />
                             <div class="card-body">

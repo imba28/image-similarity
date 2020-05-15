@@ -74,11 +74,17 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			return
 		}
 
+		if len(imageDistances) > 0 && imageDistances[0].Image.Id == image.Id {
+			imageDistances = imageDistances[1:]
+		}
+
 		view := struct {
 			Images    []pkg.ImageDistance
+			Image     pkg.Image
 			MediaRoot string
 		}{
 			Images: imageDistances,
+			Image:  *image,
 		}
 
 		similarTemplate.Execute(w, view)
