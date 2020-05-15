@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"html/template"
 	"imba28/images/pkg"
+	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -52,7 +55,7 @@ func SimilarPhotosJsonHandler(index *pkg.ImageIndex) http.HandlerFunc {
 }
 
 func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
-	similarTemplate := template.Must(template.ParseFiles("template/similar.html"))
+	similarTemplate := initTemplate("template/similar.html")
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		p := strings.Split(r.URL.Path, "/")
@@ -92,7 +95,7 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 }
 
 func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
-	indexTemplate := template.Must(template.ParseFiles("template/index.html"))
+	indexTemplate := initTemplate("template/index.html")
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		images := index.Images()
@@ -145,4 +148,18 @@ func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
 
 		indexTemplate.Execute(w, view)
 	}
+}
+
+func initTemplate(path string) *template.Template {
+	t := template.New(filepath.Base(path)).Funcs(template.FuncMap{
+		"FormatDistance": func(distance float64) float64 {
+			return math.Ceil(distance*100) / 100
+		},
+	})
+
+	contents, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Panic(err)
+	}
+	return template.Must(t.Parse(string(contents)))
 }
