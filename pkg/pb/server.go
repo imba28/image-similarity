@@ -29,11 +29,6 @@ func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (
 
 	var images []*ImageSimilarity
 	for i := range imageDistances {
-		id, err := strconv.Atoi(imageDistances[i].Image.Id)
-		if err != nil {
-			log.Printf("[GRPC] \"%s %d\" Could not convert id %q to int!", "GetSimilar", r.Image.Guid, imageDistances[i].Image.Id)
-			return nil, err
-		}
 		images = append(images, &ImageSimilarity{
 			Image:    &Image{Guid: int32(imageDistances[i].Image.Guid), Path: imageDistances[i].Image.Path},
 			Distance: imageDistances[i].Distance,
