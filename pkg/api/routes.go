@@ -113,7 +113,7 @@ func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
 		lowerBound := (page - 1) * itemsPerPage
 		upperBound := lowerBound + itemsPerPage
 		if upperBound >= len(index.Images()) {
-			upperBound = len(index.Images()) - 1
+			upperBound = len(index.Images())
 		}
 
 		pages := make([]int, int(math.Min(float64(maxPageNumber), maxPageItems)))
