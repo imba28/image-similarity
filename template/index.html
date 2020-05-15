@@ -49,7 +49,7 @@
                 </div>
             </div>
             <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination">
+                <ul class="pagination justify-content-center">
                     {{range .Pages}}
                         <li class="page-item{{if eq . $.Page}} active{{end}}">
                             <a class="page-link" href="/?page={{.}}">{{.}}</a>
