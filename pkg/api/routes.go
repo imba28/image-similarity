@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -85,9 +86,11 @@ func SimilarPhotosHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			Images    []pkg.ImageDistance
 			Image     pkg.Image
 			MediaRoot string
+			Random    int
 		}{
 			Images: imageDistances,
 			Image:  *image,
+			Random: rand.Intn(len(index.Images())),
 		}
 
 		similarTemplate.Execute(w, view)
@@ -139,11 +142,13 @@ func IndexHandler(index *pkg.ImageIndex) http.HandlerFunc {
 			Total     int
 			Pages     []int
 			MediaRoot string
+			Random    int
 		}{
 			Images: images[lowerBound:upperBound],
 			Page:   page,
 			Pages:  pages,
 			Total:  len(index.Images()),
+			Random: rand.Intn(len(index.Images())),
 		}
 
 		indexTemplate.Execute(w, view)
