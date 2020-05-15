@@ -35,7 +35,7 @@ func (s ImageSimilarityService) GetSimilar(c context.Context, r *ImageRequest) (
 			return nil, err
 		}
 		images = append(images, &ImageSimilarity{
-			Image:    &Image{Guid: int32(id), Path: imageDistances[i].Image.Path},
+			Image:    &Image{Guid: int32(imageDistances[i].Image.Guid), Path: imageDistances[i].Image.Path},
 			Distance: imageDistances[i].Distance,
 		})
 	}
